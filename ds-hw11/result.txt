@@ -1,0 +1,171 @@
+D:\CLionProjects\kmp\cmake-build-debug\kmp.exe
+text size: 1048576 bytes
+pattern: 1
+kmp: 524327 time: 5976.06us
+normal: 524327 time: 5621.66us
+
+text size: 1048576 bytes
+pattern: 11111
+kmp: 16826 time: 12917.2us
+normal: 16826 time: 12756.1us
+
+text size: 1048576 bytes
+pattern: 1111111111
+kmp: 556 time: 19974.6us
+normal: 556 time: 20569.3us
+
+text size: 1048576 bytes
+pattern: 111111111111111
+kmp: 20 time: 27119.4us
+normal: 20 time: 28433.6us
+
+text size: 1048576 bytes
+pattern: 11111111111111111111
+kmp: 1 time: 34206us
+normal: 1 time: 36332.3us
+
+text size: 1048576 bytes
+pattern: 1111111111111111111111111
+kmp: 0 time: 41209.3us
+normal: 0 time: 44223.3us
+
+
+进程已结束,退出代码0
+
+D:\CLionProjects\kmp\cmake-build-debug\kmp.exe
+text size: 524288 bytes
+pattern: 1
+kmp: 261869 time: 2940.51us
+normal: 261869 time: 2789.67us
+
+text size: 524288 bytes
+pattern: 11111
+kmp: 8490 time: 6399.46us
+normal: 8490 time: 6351.49us
+
+text size: 524288 bytes
+pattern: 1111111111
+kmp: 288 time: 9902.15us
+normal: 288 time: 10271.3us
+
+text size: 524288 bytes
+pattern: 111111111111111
+kmp: 11 time: 13449us
+normal: 11 time: 14203.2us
+
+text size: 524288 bytes
+pattern: 11111111111111111111
+kmp: 0 time: 16990us
+normal: 0 time: 18144us
+
+text size: 524288 bytes
+pattern: 1111111111111111111111111
+kmp: 0 time: 20481.4us
+normal: 0 time: 22085.6us
+
+
+进程已结束,退出代码0
+
+D:\CLionProjects\kmp\cmake-build-debug\kmp.exe
+text size: 262144 bytes
+pattern: 1
+kmp: 131045 time: 1462.14us
+normal: 131045 time: 1403.49us
+
+text size: 262144 bytes
+pattern: 11111
+kmp: 4297 time: 3209.3us
+normal: 4297 time: 3180.12us
+
+text size: 262144 bytes
+pattern: 1111111111
+kmp: 134 time: 4987.1us
+normal: 134 time: 5141.42us
+
+text size: 262144 bytes
+pattern: 111111111111111
+kmp: 6 time: 6794.95us
+normal: 6 time: 7105.25us
+
+text size: 262144 bytes
+pattern: 11111111111111111111
+kmp: 0 time: 8547.51us
+normal: 0 time: 9091.14us
+
+text size: 262144 bytes
+pattern: 1111111111111111111111111
+kmp: 0 time: 10286.8us
+normal: 0 time: 11089.4us
+
+
+进程已结束,退出代码0
+
+D:\CLionProjects\kmp\cmake-build-debug\kmp.exe
+text size: 65536 bytes
+pattern: 1
+kmp: 32718 time: 360.758us
+normal: 32718 time: 344.036us
+
+text size: 65536 bytes
+pattern: 11111
+kmp: 1072 time: 785.525us
+normal: 1072 time: 788.867us
+
+text size: 65536 bytes
+pattern: 1111111111
+kmp: 40 time: 1236.54us
+normal: 40 time: 1278.55us
+
+text size: 65536 bytes
+pattern: 111111111111111
+kmp: 2 time: 1687.4us
+normal: 2 time: 1780.13us
+
+text size: 65536 bytes
+pattern: 11111111111111111111
+kmp: 0 time: 2133.38us
+normal: 0 time: 2279.47us
+
+text size: 65536 bytes
+pattern: 1111111111111111111111111
+kmp: 0 time: 2574.67us
+normal: 0 time: 2776.52us
+
+
+进程已结束,退出代码0
+
+D:\CLionProjects\kmp\cmake-build-debug\kmp.exe
+text size: 1024 bytes
+pattern: 1
+kmp: 514 time: 2.357us
+normal: 514 time: 2.104us
+
+text size: 1024 bytes
+pattern: 11111
+kmp: 12 time: 5.257us
+normal: 12 time: 5.669us
+
+text size: 1024 bytes
+pattern: 1111111111
+kmp: 0 time: 8.265us
+normal: 0 time: 9.657us
+
+text size: 1024 bytes
+pattern: 111111111111111
+kmp: 0 time: 11.288us
+normal: 0 time: 13.624us
+
+text size: 1024 bytes
+pattern: 11111111111111111111
+kmp: 0 time: 14.323us
+normal: 0 time: 17.593us
+
+text size: 1024 bytes
+pattern: 1111111111111111111111111
+kmp: 0 time: 17.478us
+normal: 0 time: 21.586us
+
+
+进程已结束,退出代码0
+
+
