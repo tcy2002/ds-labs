@@ -4,7 +4,6 @@
 #include <mutex>
 #include <queue>
 #include <condition_variable>
-#include <atomic>
 #include <functional>
 #include <windows.h>
 
@@ -15,18 +14,22 @@ private:
     uint32_t size;
     std::vector<std::thread> pool;
     std::queue<Task> tasks;
+    int task_count;
     std::mutex mtx;
     std::condition_variable cv;
-    std::atomic<bool> init;
+    bool stop;
 
     void thread_wrapper() {
         while(true) {
-            std::unique_lock<std::mutex> lock{mtx};
-            cv.wait(lock, [this]{ return !init.load() || !tasks.empty(); });
-            if (!init.load()) break;
+            std::unique_lock<std::mutex> lock(mtx);
+            while (task_count == 0) {
+                if (stop) return;
+                cv.wait(lock);
+            }
 
-            Task task{std::move(tasks.front())};
+            Task task(std::move(tasks.front()));
             tasks.pop();
+            task_count--;
             lock.unlock();
 
             task();
@@ -34,57 +37,60 @@ private:
     }
 
 public:
-    explicit ThreadPool(size_t pool_size=0): init(false),
-    size(pool_size > 0 ? pool_size : std::thread::hardware_concurrency()) {std::cout << size << std::endl;}
-
-    ~ThreadPool() { if (init.load()) stop(); }
-
-    void start() {
-        init.store(true);
-        for(size_t i = 0; i < size; ++i)
+    explicit ThreadPool(size_t pool_size=0):
+        task_count(0),
+        stop(false),
+        size(pool_size > 0 ? pool_size : std::thread::hardware_concurrency()) {
+        std::cout << "pool size: " << size << std::endl;
+        for (int i = 0; i < size; i++) {
             pool.emplace_back(&ThreadPool::thread_wrapper, this);
+        }
     }
-
-    void stop() {
-        while (!tasks.empty());
-        init.store(false);
-
-        for (auto &th : pool) {
-            cv.notify_all();
+    ~ThreadPool() {
+        join();
+        stop = true;
+        cv.notify_all();
+        for (auto& th : pool) {
             if (th.joinable())
                 th.join();
         }
-        pool.clear();
     }
 
-    template<class Function, class... Args>
-    void push(Function fn, Args&... args) {
-        if(!init.load()) throw std::runtime_error("task executor have closed commit.");
+    template<typename Function, typename... Args>
+    void addTask(Function&& fn, Args&&... args) {
+        std::lock_guard<std::mutex> lock(mtx);
+        tasks.emplace([fn, &args...]{ fn(args...); });
+        task_count++;
+        cv.notify_one();
+    }
 
-        std::lock_guard<std::mutex> lock{mtx};
-        tasks.emplace(std::bind(fn, std::ref(args)...));
+    template <typename Iterator, typename Function>
+    void forEach(Iterator first, Iterator last, Function&& fn) {
+        while (first != last) {
+            addTask(fn, *first);
+            ++first;
+        }
+    }
 
-        cv.notify_all();
+    void join() {
+        while (true) {
+            std::unique_lock<std::mutex> lock(mtx);
+            if (task_count == 0) break;
+        }
     }
 };
 
-template <class Iterator, class Function>
-Function for_each(Iterator first, Iterator last, Function fn, int N) {
-    ThreadPool pool(N);
+class Test {
+public:
+    int _val;
+    Test(): _val(0) { std::cout << "default constructor" << std::endl; }
+    explicit Test(int val): _val(val) { std::cout << "constructor" << std::endl; }
+    Test(const Test& t): _val(t._val) { std::cout << "copy constructor" << std::endl; }
+    Test(Test&& t) noexcept: _val(t._val) { std::cout << "move constructor" << std::endl; }
+};
 
-    pool.start();
-    while (first != last) {
-        pool.push(fn, *first);
-        ++first;
-    }
-    pool.stop();
-
-    return std::move(fn);
-}
-
-void print(std::pair<int, int> &a) {
-    a.first -= 100;
-    a.second += 100;
+void exec(Test& t) {
+    t._val++;
     Sleep(10);
 }
 
@@ -93,20 +99,42 @@ int main() {
     QueryPerformanceFrequency(&freq_);
     LARGE_INTEGER begin_time;
     LARGE_INTEGER end_time;
-    double total;
 
-    std::vector<std::pair<int, int>> a;
-    for (int i = 0; i < 100; i++)
-        a.emplace_back(i, i);
+    // to initialize the vector and thread pool
+    ThreadPool pool;
+    std::vector<Test> vec;
+    vec.reserve(100);
+    for (int i = 0; i < 100; i++) {
+        vec.emplace_back(i);
+    }
+    std::cout << "init finished" << std::endl;
 
+    // sequential time
     QueryPerformanceCounter(&begin_time);
-    for_each(a.begin(), a.end(), print, 8);
+    for (auto& i : vec) {
+        exec(i);
+    }
     QueryPerformanceCounter(&end_time);
-    total += (double)(end_time.QuadPart - begin_time.QuadPart) * 1000.0 / (double)freq_.QuadPart;
-    std::cout << "total time: " << total << "ms" << std::endl;
+    auto time1 = (double)(end_time.QuadPart - begin_time.QuadPart) * 1000.0 / (double)freq_.QuadPart;
+    std::cout << "sequential time: " << time1 << "ms" << std::endl;
 
-//    for (auto &it : a)
-//        std::cout << it.first << " " << it.second << std::endl;
+    // parallel time
+    QueryPerformanceCounter(&begin_time);
+    pool.forEach(vec.begin(), vec.end(), exec);
+    pool.join();
+    QueryPerformanceCounter(&end_time);
+    auto time2 = (double)(end_time.QuadPart - begin_time.QuadPart) * 1000.0 / (double)freq_.QuadPart;
+    std::cout << "parallel time: " << time2 << "ms" << std::endl;
+
+    // parallel ratio
+    std::cout << "parallel ratio: " << time1 / time2 << std::endl;
+
+    // to print and check the executed vector
+    int sum = 0;
+    for (auto& i : vec) {
+        sum += i._val;
+    }
+    std::cout << "sum: " << sum << std::endl;
 
     return 0;
 }
