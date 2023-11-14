@@ -7,14 +7,12 @@
 #include <functional>
 #include <windows.h>
 
-typedef std::function<void()> Task;
-
-class ThreadPool{
+class ThreadPool {
 private:
+    using Task = std::function<void()>;
     uint32_t size;
     std::vector<std::thread> pool;
     std::queue<Task> tasks;
-    int task_count;
     std::mutex mtx;
     std::condition_variable cv;
     bool stop;
@@ -22,14 +20,13 @@ private:
     void thread_wrapper() {
         while(true) {
             std::unique_lock<std::mutex> lock(mtx);
-            while (task_count == 0) {
+            while (tasks.empty()) {
                 if (stop) return;
                 cv.wait(lock);
             }
 
             Task task(std::move(tasks.front()));
             tasks.pop();
-            task_count--;
             lock.unlock();
 
             task();
@@ -37,8 +34,7 @@ private:
     }
 
 public:
-    explicit ThreadPool(size_t pool_size=0):
-        task_count(0),
+    explicit ThreadPool(size_t pool_size = 0):
         stop(false),
         size(pool_size > 0 ? pool_size : std::thread::hardware_concurrency()) {
         std::cout << "pool size: " << size << std::endl;
@@ -58,9 +54,8 @@ public:
 
     template<typename Function, typename... Args>
     void addTask(Function&& fn, Args&&... args) {
-        std::lock_guard<std::mutex> lock(mtx);
+        std::unique_lock<std::mutex> lock(mtx);
         tasks.emplace([fn, &args...]{ fn(args...); });
-        task_count++;
         cv.notify_one();
     }
 
@@ -75,7 +70,7 @@ public:
     void join() {
         while (true) {
             std::unique_lock<std::mutex> lock(mtx);
-            if (task_count == 0) break;
+            if (tasks.empty()) break;
         }
     }
 };
